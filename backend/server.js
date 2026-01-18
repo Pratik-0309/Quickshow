@@ -6,6 +6,7 @@ import { connectDB } from './config/db.js';
 import { clerkMiddleware } from '@clerk/express'
 import { serve } from "inngest/express";
 import { inngest, functions } from "./inngest/index.js"
+import showRouter from "./routes/showRoute.js"
 
 const app = express();
 connectDB();
@@ -20,6 +21,8 @@ app.use(cors({
     methods: ["GET","POST","PUT","DELETE"],
     allowedHeaders: ["Content-Type","Authorization"],
 }))
+
+app.use("/api/show",showRouter);
 
 app.get("/",(req,res)=> {
     res.send("Hello World");
