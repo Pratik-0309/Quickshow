@@ -94,4 +94,63 @@ const addShow = async (req, res) => {
   }
 };
 
-export { getNowPlayingMovies, addShow };
+const getShows = async (req,res) => {
+  try {
+
+    const shows = await Show.find({})
+    .populate('movie').sort({ShowDateTime: 1});
+
+    if(!shows){
+      return res.json({
+        success: false,
+        message: "Show not available"
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      shows: shows,
+      message: "Show fetch SuccessFully"
+    })
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed To Fetch Shows"
+    })
+  }
+}
+
+const getShow = async (req,res) => {
+  try {
+    const {movieId} = req.params;
+    const shows = await Show.find({movie: movieId, ShowDateTime: {$gte: new Date()}})
+
+    const movie = await Movie.findById(movieId);
+    const dateTime = {};
+
+    shows.forEach((show)=> {
+      const date = show.ShowDateTime.toISOString().split("T")[0];
+      if(!dateTime[date]){
+        dateTime[date] = [];
+      }
+      dateTime[date].push({time: show.ShowDateTime, showId: show._id})
+    })
+
+    return res.status(200).json({
+      success: true,
+      movie,
+      dateTime,
+      message: "Show fetch Successfully"
+    })
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed To fetch Show"
+    })
+  }
+}
+
+export { getNowPlayingMovies, addShow, getShows,getShow };
