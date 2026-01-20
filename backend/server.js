@@ -7,6 +7,9 @@ import { clerkMiddleware } from '@clerk/express'
 import { serve } from "inngest/express";
 import { inngest, functions } from "./inngest/index.js"
 import showRouter from "./routes/showRoute.js"
+import bookingRouter from './routes/bookingRoute.js'
+import adminRouter from './routes/adminRoutes.js'
+import userRouter from './routes/userRoute.js'
 
 const app = express();
 connectDB();
@@ -22,13 +25,18 @@ app.use(cors({
     allowedHeaders: ["Content-Type","Authorization"],
 }))
 
+app.use("/api/inngest", serve({ client: inngest, functions }));
+
 app.use("/api/show",showRouter);
+app.use("/api/booking",bookingRouter);
+app.use("/api/admin",adminRouter);
+app.use("/api/user",userRouter);
+
 
 app.get("/",(req,res)=> {
     res.send("Hello World");
 })
 
-app.use("/api/inngest", serve({ client: inngest, functions }));
 
 app.listen(process.env.PORT || 8080,(req,res)=> {
     console.log(`Server is listening on port ${process.env.PORT || 8080}`)
