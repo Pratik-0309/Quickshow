@@ -11,8 +11,14 @@ import Loader from "../../components/Loader";
 import Title from "../../components/Admin/Title";
 import BlurCircle from "../../components/BlurCircle";
 import { dateFormat } from "../../lib/dateFormat";
+import { useAppContext } from "../../context/AppContext.jsx";
+import toast from "react-hot-toast";
+import axios from "axios";
 
 const DashBoard = () => {
+
+  const { getToken, user, image_base_url } = useAppContext();
+
   const currency = import.meta.env.VITE_CURRENCY;
   const [dashboardData, setDashboardData] = useState({
     totalBookings: 0,
@@ -46,13 +52,29 @@ const DashBoard = () => {
   ];
 
   const fetchDashboardData = async () => {
-    setDashboardData(dummyDashboardData);
-    setLoading(false);
+    try {
+      const {data} = await axios.get("/api/admin/dashboard",{
+        headers: {
+          Authorization: `Bearer ${await getToken()} `,
+        }
+      })
+      if(data.success){
+        setDashboardData(data.dashboardData);
+        setLoading(false);
+      }else{
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error('Error while fetching dashboard data:', error);
+    }
   };
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    if(user){
+      fetchDashboardData();
+    }
+  }, [user]);
 
   return !loading ? (
     <>
@@ -85,7 +107,7 @@ const DashBoard = () => {
          border-primary/20 hover:-translate-y-1 transition duration-300"
           >
             <img
-              src={show.movie.poster_path}
+              src={image_base_url+show.movie.poster_path}
               alt=""
               className="h-60 w-full object-cover"
             />
@@ -100,7 +122,7 @@ const DashBoard = () => {
                 {show.movie.vote_average.toFixed(1)}
               </p>
             </div>
-            <p className="px-2 pt-2 text-sm text-gray-500">{dateFormat(show.showDateTime)}</p>
+            <p className="px-2 pt-2 text-sm text-gray-500">{dateFormat(show.ShowDateTime)}</p>
           </div>
         ))}
       </div>
