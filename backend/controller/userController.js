@@ -33,25 +33,24 @@ const updateFavourite = async (req, res) => {
 
     const user = await clerkClient.users.getUser(userId);
 
-    if (!user.privateMetadata.favourites) {
-      user.privateMetadata.favourites = [];
-    }
+    let currentFavourites = user.privateMetadata.favourites || [];
 
-    if (!!user.privateMetadata.favourites.includes(movieId)) {
-      user.privateMetadata.favourites.push(movieId);
+    let updatedFavourites;
+    if (currentFavourites.includes(movieId)) {
+      updatedFavourites = currentFavourites.filter((id) => id !== movieId);
     } else {
-      user.privateMetadata.favourites = user.privateMetadata.favourites.filter(
-        (item) => item !== movieId,
-      );
+      updatedFavourites = [...currentFavourites, movieId];
     }
 
     await clerkClient.users.updateUserMetadata(userId, {
-      privateMetadata: user.privateMetadata,
+      privateMetadata: {
+        favourites: updatedFavourites,
+      },
     });
 
     return res.json({
       success: true,
-      message: "favourite movies updated",
+      message: updatedFavourites.includes(movieId) ? "Added to favourites" : "Removed from favourites",
     });
   } catch (error) {
     console.log(error.message);
@@ -65,15 +64,16 @@ const updateFavourite = async (req, res) => {
 const getFavourites = async (req, res) => {
   try {
     const user = await clerkClient.users.getUser(req.auth().userId);
-    const favourites = user.privateMetadata.favourites;
+    const favourites = user.privateMetadata.favourites || [];
 
-    const movies = await Movie.find({_id: {$in : favourites}});
+    const favouriteIds = favourites.map(id => String(id));
+
+    const movies = await Movie.find({ _id: { $in: favouriteIds } });
 
     return res.json({
-        success: true,
-        movies,
-    })
-
+      success: true,
+      movies,
+    });
   } catch (error) {
     console.log(error.message);
     return res.json({
