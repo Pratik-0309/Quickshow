@@ -10,9 +10,12 @@ import showRouter from "./routes/showRoute.js"
 import bookingRouter from './routes/bookingRoute.js'
 import adminRouter from './routes/adminRoutes.js'
 import userRouter from './routes/userRoute.js'
+import { stripeWebhooks } from './controller/stripeWebhook.js';
 
 const app = express();
 connectDB();
+
+app.use("/api/stripe", express.raw({type: 'application/json'}), stripeWebhooks)
  
 app.use(cookieParser());
 app.use(express.json());
