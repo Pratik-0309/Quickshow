@@ -14,6 +14,7 @@ import AddShow from "./pages/Admin/AddShow.jsx";
 import ListShow from "./pages/Admin/ListShow.jsx";
 import ListBooking from "./pages/Admin/ListBooking.jsx";
 import { useAppContext } from "./context/AppContext.jsx";
+import Loader from "./components/Loader.jsx";
 import { SignIn } from "@clerk/clerk-react";
 import { useEffect } from "react";
 
@@ -38,6 +39,7 @@ const App = () => {
         <Route path="/movies/:id" element={<MovieDetails />} />
         <Route path="/movies/:id/:date" element={<SeatLayout />} />
         <Route path="/my-bookings" element={<MyBooking />} />
+        <Route path="/loading/:nextUrl" element={<Loader/>} />
         <Route path="/favourite" element={<Favourite />} />
         <Route
           path="/admin/*"
