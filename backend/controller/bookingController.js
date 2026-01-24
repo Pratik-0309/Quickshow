@@ -39,6 +39,7 @@ const createBooking = async (req, res) => {
       show: showId,
       amount: showData.showPrice * selectedSeats.length,
       bookedSeats: selectedSeats,
+      isPaid: false,
     });
 
     selectedSeats.map((seat) => {
@@ -51,7 +52,7 @@ const createBooking = async (req, res) => {
 
     // Stripe Payment Gateway
     const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY);
-    const lineItems = [
+    const line_items = [
       {
         price_data: {
           currency: "usd",
@@ -67,7 +68,7 @@ const createBooking = async (req, res) => {
     const session = await stripeInstance.checkout.sessions.create({
       success_url: `${origin}/loading/my-bookings`,
       cancel_url: `${origin}/my-bookings`,
-      line_items: lineItems,
+      line_items: line_items,
       mode: "payment",
       metadata: {
         bookingId: booking._id.toString(),
@@ -80,9 +81,7 @@ const createBooking = async (req, res) => {
 
     return res.json({
       success: true,
-      url: session.url,
-      booking,
-      message: "Booked Successfully",
+      url: session.url
     });
   } catch (error) {
     console.log(error.message);
